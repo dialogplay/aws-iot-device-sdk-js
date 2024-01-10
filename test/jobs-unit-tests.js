@@ -18,19 +18,18 @@
 //npm deps
 
 //app deps
+var proxyquire = require('proxyquire');
 var rewire = require('rewire');
 var sinon = require('sinon');
 var assert = require('assert');
-var mqtt = require('mqtt');
 var myTls = rewire('../device/lib/tls');
 var mockTls = require('./mock/mockTls');
 var mockMQTTClient = require('./mock/mockMQTTClient');
 
 describe( "jobs class unit tests", function() {
-    var jobsModule = require('../').jobs; 
+    var jobsModule;
 
     var mockMQTTClientObject;
-    var fakeConnect;
     var mqttSave;
     var mockTlsRevert;
     var mockMqttRevert;
@@ -40,20 +39,24 @@ describe( "jobs class unit tests", function() {
 
     beforeEach( function () {
         // Mock the connect API for mqtt.js
-        fakeConnect = function(wrapper,options) {
+        mqttSave = sinon.stub().callsFake(function(wrapper,options) {
             mockMQTTClientObject = new mockMQTTClient(); // return the mocking object
             mockMQTTClientObject.reInitCommandCalled();
             mockMQTTClientObject.resetPublishedMessage();
             return mockMQTTClientObject;
-        };
+        });
 
-        mqttSave = sinon.stub(mqtt, 'MqttClient', fakeConnect);
+        jobsModule = proxyquire('../', {
+          mqtt: {
+            MqttClient: mqttSave,
+            '@global': true
+          }
+        }).jobs
 
         mockTlsRevert = myTls.__set__("tls", mockTlsObject);
         mockMqttRevert = myTls.__set__("mqtt", mockMqttObject);
     });
     afterEach( function () {
-        mqttSave.restore();
         mockTlsRevert();
         mockMqttRevert();
     });

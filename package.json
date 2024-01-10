@@ -43,8 +43,9 @@
     "gulp-mocha": "^3.0.1",
     "jshint": "^2.9.1",
     "jshint-stylish": "^2.2.1",
+    "proxyquire": "^2.1.3",
     "rewire": "^2.5.1",
-    "sinon": "^1.17.3"
+    "sinon": "^2.4.1"
   },
   "scripts": {
     "test": "node ./node_modules/gulp/bin/gulp.js test --verbose",

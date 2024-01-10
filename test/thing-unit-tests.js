@@ -18,32 +18,34 @@
 //npm deps
 
 //app deps
+var proxyquire = require('proxyquire');
 var assert = require('assert');
 var sinon = require('sinon');
-var device = require('../device');
 var mockMQTTClient = require('./mock/mockMQTTClient');
 
 
 describe( "thing shadow class unit tests", function() {
 
+    var thingShadow;
     var mockMQTTClientObject;
     var mqttSave;
 
     beforeEach( function () {
         // Mock the connect API for mqtt.js
-        var fakeConnect = function(options) {
+        mqttSave = sinon.stub().callsFake(function(options) {
             mockMQTTClientObject = new mockMQTTClient(); // return the mocking object
             mockMQTTClientObject.reInitCommandCalled();
             mockMQTTClientObject.resetPublishedMessage();
             return mockMQTTClientObject;
-        };
+        });
 
-        mqttSave = sinon.stub(device, 'DeviceClient', fakeConnect);
+        thingShadow = proxyquire('../', {
+          './device': {
+            DeviceClient: mqttSave,
+            '@global': true
+          }
+        }).thingShadow
     });
-    afterEach( function () {
-        mqttSave.restore();
-    });
-    var thingShadow = require('..').thingShadow;
 
   // Test cases begin
   describe( "register a thing shadow name", function() {
