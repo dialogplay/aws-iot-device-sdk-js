@@ -23,9 +23,17 @@ var gulp = require('gulp'),
     jscs = require('gulp-jscs'),
     beautify = require('gulp-beautify');
 
-gulp.task('default', ['test']);
+gulp.task('jshint', function() {
+  console.log('Analyzing source with JSHint and JSCS');
+  return gulp
+    .src(['common/lib/*.js','examples/**/*.js', 'device/**/*.js','thing/*.js','index.js', '!node_modules/**/*.js', '!examples/**/node_modules/**/*.js', '!examples/**/aws-configuration.js', '!browser/**/*bundle.js', '!examples/browser/**/*bundle.js'])
+    .pipe(jshint())
+    .pipe(jshint.reporter('jshint-stylish', {verbose: true}))
+    .pipe(jshint.reporter('fail'))
+    .pipe(jscs());
+});
 
-gulp.task('test', ['jshint'], function() {
+gulp.task('test', gulp.series('jshint', function() {
   console.log('Running unit tests');
   return gulp.src(['test/*unit-tests.js'], {read: false})
     .pipe(cover.instrument({
@@ -42,17 +50,9 @@ gulp.task('test', ['jshint'], function() {
     .once('end', function() {
       process.exit();
     });
-});
+}));
 
-gulp.task('jshint', function() {
-  console.log('Analyzing source with JSHint and JSCS');
-  return gulp
-    .src(['common/lib/*.js','examples/**/*.js', 'device/**/*.js','thing/*.js','index.js', '!node_modules/**/*.js', '!examples/**/node_modules/**/*.js', '!examples/**/aws-configuration.js', '!browser/**/*bundle.js', '!examples/browser/**/*bundle.js'])
-    .pipe(jshint())
-    .pipe(jshint.reporter('jshint-stylish', {verbose: true}))
-    .pipe(jshint.reporter('fail'))
-    .pipe(jscs());
-});
+gulp.task('default', gulp.series('test'));
 
 gulp.task('beautify', function() {
   console.log('Beautifying source with indent level 3');

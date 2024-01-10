@@ -34,7 +34,7 @@
     "websocket-stream": "^5.5.2"
   },
   "devDependencies": {
-    "gulp": "^3.9.0",
+    "gulp": "^4.0.2",
     "gulp-beautify": "^2.0.0",
     "gulp-concat": "^2.6.0",
     "gulp-coverage": "^0.3.38",
